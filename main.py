@@ -2,6 +2,9 @@ import discord
 from discord import app_commands
 
 import config
+from model.Birthday import Birthday
+
+Birthday.init()
 
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
