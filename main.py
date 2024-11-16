@@ -8,12 +8,38 @@ client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
 
 
+async def send_birthday_notif(user: discord.User, name: str):
+    await user.send(f"Today is the birthday of {name}")
+
+
 @tree.command(
-    name="test",
-    description="test",
+    name="add_birthday",
+    description="add a birthday to be notified of",
 )
-async def test(interaction):
-    await interaction.response.send_message("Pomme")
+async def add_birthday(
+    interaction: discord.Interaction, day: int, month: int, name: str
+):
+    message = (
+        f"The insertion of\n```\nname: {name}\ndate: {day}/{month}\n```has succeeded\n"
+    )
+    try:
+        pass
+    except Exception as e:
+        message = f"an error as occured\n```\n{e}\n```"
+    await interaction.response.send_message(message)
+
+
+@tree.command(
+    name="remove_birthday",
+    description="remove a birthday to be notified of",
+)
+async def remove_birthday(interaction: discord.Interaction, name: str):
+    message = f"The removal of the birthday of {name} has succeeded"
+    try:
+        pass
+    except Exception as e:
+        message = f"an error as occured\n```\n{e}\n```"
+    await interaction.response.send_message(message)
 
 
 @client.event
