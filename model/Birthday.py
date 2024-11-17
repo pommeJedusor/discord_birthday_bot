@@ -61,6 +61,24 @@ class Birthday:
                 cursor.close()
 
     @staticmethod
+    def getByUserId(user_id: int) -> List["Birthday"]:
+        cursor = None
+        try:
+            sql = "SELECT * FROM birthdays WHERE `user_id` = ?"
+            cursor = conn.cursor()
+            cursor.execute(sql, (user_id,))
+            results = cursor.fetchall()
+            return [
+                Birthday(result[4], result[3], result[1], result[2])
+                for result in results
+            ]
+        except Exception as e:
+            raise e
+        finally:
+            if cursor:
+                cursor.close()
+
+    @staticmethod
     def getAll() -> List["Birthday"]:
         cursor = None
         try:

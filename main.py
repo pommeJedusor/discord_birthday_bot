@@ -47,6 +47,22 @@ async def remove_birthday(interaction: discord.Interaction, name: str):
     await interaction.response.send_message(message)
 
 
+@tree.command(
+    name="see_birthdays",
+    description="See all the birthdays you inserted",
+)
+async def see_birthdays(interaction: discord.Interaction):
+    message = f""
+    try:
+        birthdays = Birthday.getByUserId(interaction.user.id)
+        for birthday in birthdays:
+            message += f"{birthday.name}: {birthday.day}/{birthday.month}\n"
+        message = message or "No birthday found, to insert one do `/add_birthday`"
+    except Exception as e:
+        message = f"an error as occured\n```\n{e}\n```"
+    await interaction.response.send_message(message)
+
+
 @client.event
 async def on_ready():
     await tree.sync()
