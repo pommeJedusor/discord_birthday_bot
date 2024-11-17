@@ -26,7 +26,7 @@ async def add_birthday(
         f"The insertion of\n```\nname: {name}\ndate: {day}/{month}\n```has succeeded\n"
     )
     try:
-        Birthday(interaction.user.id, name, day, month).save()
+        Birthday.save(interaction.user.id, name, day, month)
     except Exception as e:
         message = f"an error as occured\n```\n{e}\n```"
     await interaction.response.send_message(message)
@@ -39,7 +39,9 @@ async def add_birthday(
 async def remove_birthday(interaction: discord.Interaction, name: str):
     message = f"The removal of the birthday of {name} has succeeded"
     try:
-        pass
+        if not Birthday.getByUserIdAndName(interaction.user.id, name):
+            raise Exception("birthday not found")
+        Birthday.delete(interaction.user.id, name)
     except Exception as e:
         message = f"an error as occured\n```\n{e}\n```"
     await interaction.response.send_message(message)
