@@ -26,15 +26,22 @@ python3 main.py
 
 
 ### Docker
-get/make the image
-```bash
-docker build -t discord_birthday_bot .
-```
+with docker you can either build the image or pull it,
+if you choose to pull it you don't even need to clone this github repo
 
-then create a volume and run it
+#### make the image
 ```bash
-# create a directory data to store the data
-mkdir data
+# build the image
+docker build -t discord_birthday_bot .
 # don't forget to change the token
 docker run -d -e DATABASE=db/database.db -e TOKEN=INSERT_YOUR_TOKEN_HERE -v ./data:/app/db discord_birthday_bot
+```
+
+#### pull the image
+then create a volume and run it
+```bash
+# pull the image from the docker hub
+docker pull pommejedusor/discord_birthday_bot
+# don't forget to change the token
+docker run -d -e DATABASE=db/database.db -e TOKEN=INSERT_YOUR_TOKEN_HERE -v ./data:/app/db pommejedusor/discord_birthday_bot
 ```
