@@ -68,7 +68,7 @@ async def add_birthday(
         Birthday.save(interaction.user.id, name, day, month)
     except Exception as e:
         message = f"an error as occured\n```\n{e}\n```"
-    await interaction.response.send_message(message)
+    await interaction.response.send_message(message, ephemeral=True)
 
 
 @tree.command(
@@ -83,7 +83,7 @@ async def remove_birthday(interaction: discord.Interaction, name: str):
         Birthday.delete(interaction.user.id, name)
     except Exception as e:
         message = f"an error as occured\n```\n{e}\n```"
-    await interaction.response.send_message(message)
+    await interaction.response.send_message(message, ephemeral=True)
 
 
 @tree.command(
@@ -99,7 +99,7 @@ async def see_birthdays(interaction: discord.Interaction):
         message = message or "No birthday found, to insert one do `/add_birthday`"
     except Exception as e:
         message = f"an error as occured\n```\n{e}\n```"
-    await interaction.response.send_message(message)
+    await interaction.response.send_message(message, ephemeral=True)
 
 
 @client.event
