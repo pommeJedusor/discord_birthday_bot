@@ -15,7 +15,17 @@ class Birthday:
         self.month = month
 
     def save(self):
-        pass
+        cursor = None
+        try:
+            sql = "INSERT INTO birthdays(`user_id`, `name`, `day`, `month`) VALUES(?,?,?,?)"
+            cursor = conn.cursor()
+            cursor.execute(sql, (self.user_id, self.name, self.day, self.month))
+            conn.commit()
+        except Exception as e:
+            raise e
+        finally:
+            if cursor:
+                cursor.close()
 
     @staticmethod
     def getAll():

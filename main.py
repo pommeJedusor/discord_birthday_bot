@@ -26,7 +26,7 @@ async def add_birthday(
         f"The insertion of\n```\nname: {name}\ndate: {day}/{month}\n```has succeeded\n"
     )
     try:
-        pass
+        Birthday(interaction.user.id, name, day, month).save()
     except Exception as e:
         message = f"an error as occured\n```\n{e}\n```"
     await interaction.response.send_message(message)
