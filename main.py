@@ -1,5 +1,7 @@
 import discord
 from discord import app_commands
+from discord.ext import tasks
+import datetime
 
 import config
 from model.Birthday import Birthday
@@ -7,12 +9,37 @@ from model.Birthday import Birthday
 Birthday.init()
 
 intents = discord.Intents.default()
+intents.members = True
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
 
 
+current_date = (None, None)
+
+
 async def send_birthday_notif(user: discord.User, name: str):
     await user.send(f"Today is the birthday of {name}")
+
+
+@tasks.loop(minutes=5)
+async def check_birthdays():
+    global current_date
+
+    today = datetime.datetime.today()
+    if current_date == (today.day, today.month):
+        return
+
+    today_birthdays = Birthday.getByDate(today.day, today.month)
+    current_date = (today.day, today.month)
+
+    while today_birthdays:
+        birthday = today_birthdays.pop()
+        user = client.get_user(birthday.user_id)
+        print(birthday.user_id)
+        if user is None:
+            Birthday.delete(birthday.user_id, birthday.name)
+        else:
+            await send_birthday_notif(user, birthday.name)
 
 
 @tree.command(
@@ -66,6 +93,7 @@ async def see_birthdays(interaction: discord.Interaction):
 @client.event
 async def on_ready():
     await tree.sync()
+    check_birthdays.start()
     print("Ready!")
 
 
