@@ -1,3 +1,4 @@
+from datetime import datetime
 import sqlite3
 from typing import List, Optional
 
@@ -14,6 +15,26 @@ class Birthday:
         self.name = name
         self.day = day
         self.month = month
+
+    def check(self):
+        cursor = None
+        try:
+            sql = """
+                UPDATE birthdays
+                SET
+                  last_check = ?
+                WHERE
+                  `user_id` = ? AND
+                  `name` = ?
+            """
+            cursor = conn.cursor()
+            cursor.execute(sql, (datetime.today().year, self.user_id, self.name))
+            conn.commit()
+        except Exception as e:
+            raise e
+        finally:
+            if cursor:
+                cursor.close()
 
     @staticmethod
     def save(user_id: int, name: str, day: int, month: int):
@@ -79,15 +100,20 @@ class Birthday:
                 cursor.close()
 
     @staticmethod
-    def getByDate(day: int, month: int) -> List["Birthday"]:
+    def getByDateIfNotChecked(day: int, month: int) -> List["Birthday"]:
         cursor = None
         try:
-            sql = "SELECT * FROM birthdays WHERE `day` = ? AND `month` = ?"
+            sql = "SELECT * FROM birthdays WHERE `day` = ? AND `month` = ? AND (last_check <> ? OR last_check is NULL)"
             cursor = conn.cursor()
-            cursor.execute(sql, (day, month))
+            cursor.execute(sql, (day, month, datetime.today().year))
             results = cursor.fetchall()
             return [
-                Birthday(result[4], result[3], result[1], result[2])
+                Birthday(
+                    result[4],
+                    result[3],
+                    result[1],
+                    result[2],
+                )
                 for result in results
             ]
         except Exception as e:
@@ -125,6 +151,7 @@ class Birthday:
                     month INTEGER CHECK(month >= 1 AND month <= 12),
                     name TEXT NOT NULL,
                     user_id BIGINT NOT NULL,
+                    last_check INT NULL,
                     UNIQUE(name, user_id)
                 );
             """

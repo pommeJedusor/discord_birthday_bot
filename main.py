@@ -29,17 +29,17 @@ async def check_birthdays():
     if current_date == (today.day, today.month):
         return
 
-    today_birthdays = Birthday.getByDate(today.day, today.month)
+    today_birthdays = Birthday.getByDateIfNotChecked(today.day, today.month)
     current_date = (today.day, today.month)
 
     while today_birthdays:
         birthday = today_birthdays.pop()
         user = client.get_user(birthday.user_id)
-        print(birthday.user_id)
         if user is None:
             Birthday.delete(birthday.user_id, birthday.name)
         else:
             await send_birthday_notif(user, birthday.name)
+            birthday.check()
 
 
 @tree.command(
