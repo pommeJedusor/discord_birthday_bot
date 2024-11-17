@@ -1,10 +1,22 @@
+import os
+from dotenv import load_dotenv
+
 import discord
 from discord import app_commands
 from discord.ext import tasks
 import datetime
 
-import config
+if not os.path.exists("db"):
+    os.makedirs("db")
+
 from model.Birthday import Birthday
+
+
+load_dotenv()
+TOKEN = os.getenv("TOKEN")
+if TOKEN is None:
+    print("Please set a TOKEN")
+    exit()
 
 Birthday.init()
 
@@ -97,4 +109,4 @@ async def on_ready():
     print("Ready!")
 
 
-client.run(config.TOKEN)
+client.run(TOKEN)

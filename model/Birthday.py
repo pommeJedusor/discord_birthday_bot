@@ -1,10 +1,17 @@
 from datetime import datetime
+import os
 import sqlite3
 from typing import List, Optional
 
-import config
+from dotenv import load_dotenv
 
-conn = sqlite3.connect(config.DB_NAME)
+load_dotenv()
+DATABASE = os.getenv("DATABASE")
+if DATABASE is None:
+    print("Please set a DATABASE name")
+    exit()
+
+conn = sqlite3.connect(DATABASE)
 
 MONTH_LENGTHS = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
