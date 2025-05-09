@@ -1,4 +1,5 @@
 import os
+import subprocess
 from typing import Optional
 from dotenv import load_dotenv
 
@@ -7,11 +8,13 @@ from discord import app_commands
 from discord.ext import tasks
 import datetime
 
+
 if not os.path.exists("db"):
     os.makedirs("db")
 
 from model.Birthday import Birthday
 from model.Event import Event
+from model.HealthCheckUser import HealthCheckUser
 
 
 load_dotenv()
@@ -22,6 +25,7 @@ if TOKEN is None:
 
 Birthday.init()
 Event.init()
+HealthCheckUser.init()
 
 intents = discord.Intents.default()
 intents.members = True
@@ -38,6 +42,8 @@ async def send_birthday_notif(user: discord.User, name: str):
 async def send_event_notif(user: discord.User, name: str):
     await user.send(f"event:\n```{name}\n```")
 
+async def send_health_check_notif(user: discord.User, output: str):
+    await user.send(f"health check failed:\n```{output}\n```")
 
 @tasks.loop(minutes=5)
 async def check_birthdays():
@@ -72,6 +78,20 @@ async def check_events():
             await send_event_notif(user, event.name)
         Event.delete(event.user_id, event.name)
 
+@tasks.loop(hours=1)
+async def check_health():
+    health_checks_path = os.getcwd() + "/health_checks"
+    for file in os.listdir(health_checks_path):
+        if not file.endswith(".py"):
+            continue
+        file_path = os.path.join(health_checks_path, file)
+        result = subprocess.run(['python', file_path], capture_output=True, text=True)
+        if result.returncode != 0:
+            users = HealthCheckUser.getByPurpose("health_check")
+            for user in users:
+                discord_user = client.get_user(user.id)
+                if not discord_user is None:
+                    await send_health_check_notif(discord_user, result.stdout)
 
 ########################################
 #               BIRTHDAYS              #
@@ -175,12 +195,12 @@ async def see_events(interaction: discord.Interaction):
         message = f"an error as occured\n```\n{e}\n```"
     await interaction.response.send_message(message, ephemeral=True)
 
-
 @client.event
 async def on_ready():
     await tree.sync()
     check_birthdays.start()
     check_events.start()
+    check_health.start()
     print("Ready!")
 
 
