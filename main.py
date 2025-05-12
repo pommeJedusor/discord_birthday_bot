@@ -150,16 +150,21 @@ async def see_birthdays(interaction: discord.Interaction):
 
 @tree.command(
     name="add_event",
-    description="add a event to be notified of",
+    description="add a event to be notified of (by default set it to -> now + 1 minute)",
 )
 async def add_event(
-        interaction: discord.Interaction, minute: int, hour: int, day: int, month: int, name: str, year: Optional[int]
+        interaction: discord.Interaction, minute: Optional[int], hour: Optional[int], day: Optional[int], month: Optional[int], name: str, year: Optional[int]
 ):
+    minute = minute or datetime.datetime.today().minute + 1
+    hour   = hour   or datetime.datetime.today().hour
+    day    = day    or datetime.datetime.today().day
+    month  = month  or datetime.datetime.today().month
+    year   = year   or datetime.datetime.today().year
     message = (
             f"The insertion of\n```\nname: {name}\ndate: {hour}:{minute} the {day}/{month}\n```has succeeded\n"
     )
     try:
-        Event.save(interaction.user.id, name, minute, hour, day, month, year or datetime.datetime.today().year)
+        Event.save(interaction.user.id, name, minute, hour, day, month, year)
     except Exception as e:
         message = f"an error as occured\n```\n{e}\n```"
     await interaction.response.send_message(message, ephemeral=True)
