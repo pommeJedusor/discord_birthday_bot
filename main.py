@@ -6,7 +6,8 @@ from dotenv import load_dotenv
 import discord
 from discord import app_commands
 from discord.ext import tasks
-import datetime
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 
 if not os.path.exists("db"):
@@ -49,7 +50,7 @@ async def send_health_check_notif(user: discord.User, output: str):
 async def check_birthdays():
     global current_date
 
-    today = datetime.datetime.today()
+    today = datetime.now(tz=ZoneInfo('UTC'))
     if current_date == (today.day, today.month):
         return
 
@@ -67,7 +68,7 @@ async def check_birthdays():
 
 @tasks.loop(seconds=30)
 async def check_events():
-    now = datetime.datetime.today()
+    now = datetime.now(tz=ZoneInfo('UTC'))
 
     due_events = Event.getByDate(now.minute, now.hour, now.day, now.month, now.year)
 
@@ -155,11 +156,12 @@ async def see_birthdays(interaction: discord.Interaction):
 async def add_event(
         interaction: discord.Interaction, minute: Optional[int], hour: Optional[int], day: Optional[int], month: Optional[int], name: str, year: Optional[int]
 ):
-    minute = minute or datetime.datetime.today().minute + 1
-    hour   = hour   or datetime.datetime.today().hour
-    day    = day    or datetime.datetime.today().day
-    month  = month  or datetime.datetime.today().month
-    year   = year   or datetime.datetime.today().year
+    now = datetime.now(tz=ZoneInfo('UTC'))
+    minute = minute if minute != None else now.minute + 1
+    hour   = hour   if hour   != None else now.hour
+    day    = day    if day    != None else now.day
+    month  = month  if month  != None else now.month
+    year   = year   if year   != None else now.year
     message = (
             f"The insertion of\n```\nname: {name}\ndate: {hour}:{minute} the {day}/{month}\n```has succeeded\n"
     )
