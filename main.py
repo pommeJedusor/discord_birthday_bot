@@ -40,17 +40,20 @@ current_date = (None, None)
 async def send_birthday_notif(user: discord.User, name: str):
     await user.send(f"Today is the birthday of {name}")
 
+
 async def send_event_notif(user: discord.User, name: str):
     await user.send(f"event:\n```{name}\n```")
 
+
 async def send_health_check_notif(user: discord.User, output: str):
     await user.send(f"health check failed:\n```{output}\n```")
+
 
 @tasks.loop(minutes=5)
 async def check_birthdays():
     global current_date
 
-    today = datetime.now(tz=ZoneInfo('UTC'))
+    today = datetime.now(tz=ZoneInfo("UTC"))
     if current_date == (today.day, today.month):
         return
 
@@ -66,9 +69,10 @@ async def check_birthdays():
             await send_birthday_notif(user, birthday.name)
             birthday.check()
 
+
 @tasks.loop(seconds=30)
 async def check_events():
-    now = datetime.now(tz=ZoneInfo('UTC'))
+    now = datetime.now(tz=ZoneInfo("UTC"))
 
     due_events = Event.getByDate(now.minute, now.hour, now.day, now.month, now.year)
 
@@ -79,6 +83,7 @@ async def check_events():
             await send_event_notif(user, event.name)
         Event.delete(event.user_id, event.name)
 
+
 @tasks.loop(hours=1)
 async def check_health():
     health_checks_path = os.getcwd() + "/health_checks"
@@ -86,7 +91,7 @@ async def check_health():
         if not file.endswith(".py"):
             continue
         file_path = os.path.join(health_checks_path, file)
-        result = subprocess.run(['python', file_path], capture_output=True, text=True)
+        result = subprocess.run(["python", file_path], capture_output=True, text=True)
         if result.returncode != 0:
             users = HealthCheckUser.getByPurpose("health_check")
             for user in users:
@@ -94,9 +99,11 @@ async def check_health():
                 if not discord_user is None:
                     await send_health_check_notif(discord_user, result.stdout)
 
+
 ########################################
 #               BIRTHDAYS              #
 ########################################
+
 
 @tree.command(
     name="add_birthday",
@@ -145,26 +152,32 @@ async def see_birthdays(interaction: discord.Interaction):
         message = f"an error as occured\n```\n{e}\n```"
     await interaction.response.send_message(message, ephemeral=True)
 
+
 ########################################
 #                EVENTS                #
 ########################################
+
 
 @tree.command(
     name="add_event",
     description="add a event to be notified of (by default set it to -> now + 1 minute)",
 )
 async def add_event(
-        interaction: discord.Interaction, minute: Optional[int], hour: Optional[int], day: Optional[int], month: Optional[int], name: str, year: Optional[int]
+    interaction: discord.Interaction,
+    minute: Optional[int],
+    hour: Optional[int],
+    day: Optional[int],
+    month: Optional[int],
+    name: str,
+    year: Optional[int],
 ):
-    now = datetime.now(tz=ZoneInfo('UTC'))
+    now = datetime.now(tz=ZoneInfo("UTC"))
     minute = minute if minute != None else now.minute + 1
-    hour   = hour   if hour   != None else now.hour
-    day    = day    if day    != None else now.day
-    month  = month  if month  != None else now.month
-    year   = year   if year   != None else now.year
-    message = (
-            f"The insertion of\n```\nname: {name}\ndate: {hour}:{minute} the {day}/{month}\n```has succeeded\n"
-    )
+    hour = hour if hour != None else now.hour
+    day = day if day != None else now.day
+    month = month if month != None else now.month
+    year = year if year != None else now.year
+    message = f"The insertion of\n```\nname: {name}\ndate: {hour}:{minute} the {day}/{month}\n```has succeeded\n"
     try:
         Event.save(interaction.user.id, name, minute, hour, day, month, year)
     except Exception as e:
@@ -201,6 +214,7 @@ async def see_events(interaction: discord.Interaction):
     except Exception as e:
         message = f"an error as occured\n```\n{e}\n```"
     await interaction.response.send_message(message, ephemeral=True)
+
 
 @client.event
 async def on_ready():
