@@ -7,10 +7,12 @@ def main():
     paths = [
         "/get_next_attempt?words=roate|BBBBB||slimy|BBBBB",
         "https://api-wordle-solver.chesspomme.com/get_next_attempt?words=roate|YGBBB||cundy|BBGBB",
+        "https://api-wordle-solver.chesspomme.com/get_next_attempt?words=salet|BBBBB||round|BBBBB||champ|BBBBB||jiffy|BBBBB",
     ]
     expectations = [
-        "hanap",
+        "pubco",
         "honorY",
+        "",
     ]
     conn = http.client.HTTPSConnection(domain)
     print("-- domain:", domain)
